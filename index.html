@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Bintro</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --surface:#f5f5f4;
+    --surface-2:#ececea;
+    --text:#1c1b1a;
+    --text-2:#5f5b57;
+    --line:#e4e2df;
+    --action:#b24e05;
+    --action-press:#843e05;
+    --action-tint:#fbeee4;
+    --good:#4d6403;
+    --good-tint:#eef3de;
+    --warn:#9a5a00;
+    --warn-tint:#fdf1dc;
+    --bad:#b3261e;
+    --bad-tint:#fbe9e7;
+    --radius-lg:24px;
+    --radius:16px;
+    --radius-sm:10px;
+    --shadow:0 1px 2px rgba(28,27,26,.06),0 4px 16px rgba(28,27,26,.06);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --nav-h:64px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--text)}
+  body{font-family:var(--font);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
+    padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px))}
+  button{font:inherit;color:inherit}
+  .num{font-variant-numeric:tabular-nums}
+  :focus-visible{outline:3px solid var(--action);outline-offset:2px;border-radius:8px}
+
+  /* header */
+  .top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:saturate(1.4) blur(12px);
+    -webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+  .top-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:12px 20px}
+  .logo{font-size:22px;font-weight:800;letter-spacing:-.03em;display:flex;align-items:center;gap:8px}
+  .logo-mark{width:30px;height:30px;border-radius:9px;background:var(--action);display:grid;place-items:center}
+  .logo-mark svg{width:18px;height:18px}
+  .workspace{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:999px;
+    padding:6px 12px 6px 6px;font-size:14px;font-weight:600}
+  .ws-dot{width:24px;height:24px;border-radius:50%;background:var(--text);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+
+  /* nav */
+  .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--line);
+    display:flex;justify-content:space-around;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+  .nav button{flex:1;max-width:120px;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:6px 0;font-size:12px;font-weight:600;color:var(--text-2)}
+  .nav .ic{width:56px;height:30px;border-radius:999px;display:grid;place-items:center;transition:background .2s}
+  .nav svg{width:22px;height:22px}
+  .nav button[aria-current="page"]{color:var(--text)}
+  .nav button[aria-current="page"] .ic{background:var(--action-tint);color:var(--action)}
+  @media(min-width:900px){
+    body{padding-bottom:0}
+    .nav{position:static;border:0;background:none;padding:0;justify-content:flex-start;gap:4px}
+    .nav button{flex:none;max-width:none;flex-direction:row;gap:8px;padding:8px 14px;border-radius:999px;font-size:14px}
+    .nav .ic{width:auto;height:auto;background:none!important}
+    .nav button[aria-current="page"]{background:var(--action-tint);color:var(--action)}
+    .top-in{gap:24px}
+    .workspace{margin-left:0}
+    .nav-slot{flex:1;display:flex;justify-content:center}
+  }
+  @media(max-width:899px){.nav-slot{display:none}}
+
+  main{max-width:1100px;margin:0 auto;padding:20px}
+  .view{display:none}
+  .view.show{display:block}
+  h1{font-size:28px;line-height:1.15;letter-spacing:-.02em;margin:4px 0 4px;font-weight:750}
+  .lead{color:var(--text-2);margin:0 0 20px}
+
+  /* banner */
+  .banner{display:flex;gap:12px;align-items:center;background:var(--warn-tint);border-radius:var(--radius);padding:12px 14px;margin-bottom:18px;font-size:14px}
+  .banner p{margin:0;flex:1}
+
+  /* buttons */
+  .btn{border:0;cursor:pointer;border-radius:999px;padding:12px 20px;font-weight:650;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .15s,transform .1s}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:var(--action);color:#fff}
+  .btn-primary:hover{background:var(--action-press)}
+  .btn-tonal{background:var(--surface);color:var(--text)}
+  .btn-tonal:hover{background:var(--surface-2)}
+  .btn-text{background:none;color:var(--action);padding:10px 12px}
+  .btn-sm{padding:8px 14px;font-size:14px}
+  .btn svg{width:18px;height:18px}
+  .btn[disabled]{opacity:.5;pointer-events:none}
+
+  /* scan screen */
+  .scan-layout{display:grid;gap:24px}
+  @media(min-width:900px){.scan-layout{grid-template-columns:1.1fr .9fr;align-items:start}}
+  .hero{background:var(--surface);border-radius:var(--radius-lg);padding:28px 20px 24px;display:flex;flex-direction:column;align-items:center;text-align:center}
+  .orb{--c:var(--text);--t:#fff;width:min(260px,68vw);aspect-ratio:1;border-radius:50%;border:0;cursor:pointer;
+    background:var(--t);box-shadow:inset 0 0 0 10px var(--c),var(--shadow);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:box-shadow .25s,background .25s,transform .15s}
+  .orb:active{transform:scale(.97)}
+  .orb svg{width:44px;height:44px;color:var(--c)}
+  .orb .o-title{font-size:24px;font-weight:750;letter-spacing:-.02em}
+  .orb .o-sub{font-size:14px;color:var(--text-2);max-width:78%}
+  .orb.idle{--c:var(--action);--t:#fff}
+  .orb.good{--c:var(--good);--t:var(--good-tint)}
+  .orb.warn{--c:var(--warn);--t:var(--warn-tint)}
+  .orb.bad{--c:var(--bad);--t:var(--bad-tint)}
+  .orb.bump{animation:bump .45s ease}
+  @keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.05)}100%{transform:scale(1)}}
+  .hero-note{margin:18px 0 4px;font-size:14px;color:var(--text-2);display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap}
+  .live{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px var(--good-tint)}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+  .stat{background:var(--surface);border-radius:var(--radius);padding:14px}
+  .stat b{display:block;font-size:24px;font-weight:750;letter-spacing:-.02em}
+  .stat span{font-size:13px;color:var(--text-2)}
+  h2{font-size:18px;margin:0 0 10px;font-weight:700}
+
+  .list{list-style:none;margin:0;padding:0}
+  .row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .thumb{width:44px;height:44px;border-radius:12px;background:var(--surface);flex:none;display:grid;place-items:center;
+    font-weight:700;color:var(--text-2);overflow:hidden;font-size:15px}
+  .thumb img{width:100%;height:100%;object-fit:contain;background:#fff}
+  .row-main{flex:1;min-width:0}
+  .row-title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row-sub{font-size:13px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row-end{font-size:13px;color:var(--text-2);text-align:right;white-space:nowrap}
+  .icon-btn{border:0;background:none;cursor:pointer;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--text-2)}
+  .icon-btn:hover{background:var(--surface)}
+  .icon-btn svg{width:20px;height:20px}
+  .empty{text-align:center;padding:36px 20px;color:var(--text-2);background:var(--surface);border-radius:var(--radius)}
+  .empty b{display:block;color:var(--text);font-size:17px;margin-bottom:4px}
+  .empty .btn{margin-top:14px}
+
+  /* tags */
+  .tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--surface);color:var(--text-2)}
+  .tag.plastic{background:var(--good-tint);color:var(--good)}
+  .tag.cardboard{background:var(--action-tint);color:var(--action-press)}
+  .tag.other{background:var(--bad-tint);color:var(--bad)}
+
+  /* search + chips */
+  .search{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:999px;padding:0 16px;margin-bottom:16px}
+  .search svg{width:20px;height:20px;color:var(--text-2);flex:none}
+  .search input{flex:1;border:0;background:none;padding:14px 0;font:inherit;outline:none}
+  .head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .chip[aria-pressed="true"]{background:var(--text);color:#fff;border-color:var(--text)}
+
+  /* groups */
+  .group{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:4px 16px;margin-bottom:14px}
+  .group-head{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0 6px;gap:12px}
+  .group-head h3{margin:0;font-size:17px}
+  .group-head span{font-weight:700}
+  .stepper{display:flex;align-items:center;background:var(--surface);border-radius:999px}
+  .stepper button{border:0;background:none;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:18px;font-weight:600}
+  .stepper button:hover{background:var(--surface-2)}
+  .stepper span{min-width:22px;text-align:center;font-weight:700}
+  .total{display:flex;justify-content:space-between;align-items:center;padding:18px 4px;font-size:18px;font-weight:750}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+
+  /* sheet */
+  .scrim{position:fixed;inset:0;background:rgba(28,27,26,.4);z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+  .scrim.open{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;border-radius:24px 24px 0 0;max-height:92vh;overflow:auto;
+    transform:translateY(105%);transition:transform .28s cubic-bezier(.2,.8,.2,1);padding:8px 20px calc(24px + env(safe-area-inset-bottom,0px))}
+  .sheet.open{transform:none}
+  @media(min-width:700px){.sheet{left:50%;right:auto;width:560px;bottom:auto;top:50%;border-radius:24px;
+    transform:translate(-50%,-44%);opacity:0;pointer-events:none;transition:transform .22s,opacity .22s}
+    .sheet.open{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}}
+  .grabber{width:40px;height:4px;border-radius:4px;background:var(--line);margin:4px auto 14px}
+  @media(min-width:700px){.grabber{display:none}}
+  .sheet h2{font-size:22px;margin:0 0 4px}
+  .sheet .sub{color:var(--text-2);font-size:14px;margin:0 0 16px}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--text-2);margin:0 0 6px}
+  .field input{width:100%;font:inherit;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;outline:none}
+  .field input:focus{border-color:var(--action);box-shadow:0 0 0 3px var(--action-tint)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font-size:14px;font-weight:600;cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--text);color:#fff;border-color:var(--text)}
+  .sheet-actions{display:flex;gap:10px;margin-top:18px}
+  .sheet-actions .btn{flex:1}
+  .found{display:flex;gap:12px;align-items:center;background:var(--surface);border-radius:var(--radius);padding:12px;margin-bottom:16px}
+  .found .thumb{width:56px;height:56px}
+  .found p{margin:0;font-size:14px;color:var(--text-2)}
+  .found b{color:var(--text)}
+  .found.miss{background:var(--warn-tint)}
+  .skel{height:14px;border-radius:6px;background:linear-gradient(90deg,var(--surface) 25%,var(--surface-2) 50%,var(--surface) 75%);background-size:200% 100%;animation:sh 1.2s infinite;margin:6px 0}
+  @keyframes sh{to{background-position:-200% 0}}
+  .label-btn{width:100%;margin-bottom:16px}
+
+  /* camera */
+  .cam{position:fixed;inset:0;z-index:70;background:#000;display:none;flex-direction:column}
+  .cam.open{display:flex}
+  .cam-bar{display:flex;align-items:center;justify-content:space-between;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;color:#fff}
+  .cam-bar button{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:10px 16px;font-weight:600;cursor:pointer}
+  #reader{flex:1;position:relative;overflow:hidden}
+  #reader video{width:100%!important;height:100%!important;object-fit:cover}
+  .cam-hint{color:#fff;text-align:center;padding:16px 20px calc(24px + env(safe-area-inset-bottom,0px));font-size:15px}
+  .cam-msg{color:#fff;text-align:center;padding:40px 24px;margin:auto;max-width:420px}
+
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:calc(var(--nav-h) + 20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);
+    background:var(--text);color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;
+    transition:.25s;z-index:80;max-width:calc(100vw - 32px);box-shadow:var(--shadow);display:flex;gap:14px;align-items:center}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  @media(min-width:900px){.toast{bottom:28px}}
+
+  .foot{text-align:center;color:var(--text-2);font-size:13px;padding:28px 0 12px}
+  .foot button{border:0;background:none;color:var(--action);font-weight:600;cursor:pointer;font-size:13px}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  @media print{
+    .top,.nav,.actions,.chips,.foot,.banner,.stepper button{display:none!important}
+    body{padding:0} .view{display:none!important} #view-reorder{display:block!important}
+    .group{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="logo">
+      <span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.5 12.5a2 2 0 0 1-2 1.5h-9a2 2 0 0 1-2-1.5L4 7z"/><path d="M9 11l3 3 3-3"/><path d="M9 3h6"/></svg></span>
+      Bintro
+    </div>
+    <div class="nav-slot" id="navSlot"></div>
+    <div class="workspace" title="Workspace"><span class="ws-dot">SN</span>Shag Noir Salon</div>
+  </div>
+</header>
+
+<nav class="nav" id="nav" aria-label="Main">
+  <button data-view="scan" aria-current="page"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M17 8v8"/></svg></span>Scan</button>
+  <button data-view="catalog"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>Products</button>
+  <button data-view="activity"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Activity</button>
+  <button data-view="reorder"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11.5l2-8H6.2"/></svg></span>Reorder</button>
+</nav>
+
+<main>
+  <div class="banner" id="sampleBanner" hidden>
+    <p>You're looking at a sample week so every screen has something in it. Clear it when you're ready to log for real.</p>
+    <button class="btn btn-tonal btn-sm" id="clearSample">Clear sample</button>
+  </div>
+
+  <!-- SCAN -->
+  <section class="view show" id="view-scan">
+    <div class="scan-layout">
+      <div class="hero">
+        <button class="orb idle" id="orb" aria-live="polite">
+          <svg id="orbIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>
+          <span class="o-title" id="orbTitle">Tap to scan</span>
+          <span class="o-sub" id="orbSub">Point your camera at the barcode</span>
+        </button>
+        <p class="hero-note"><span class="live" aria-hidden="true"></span>Bluetooth and USB scanners work anytime on this screen</p>
+        <button class="btn btn-text" id="typeCode">Type a barcode instead</button>
+      </div>
+
+      <div>
+        <div class="stats">
+          <div class="stat"><b class="num" id="sCount">0</b><span>Recycled today</span></div>
+          <div class="stat"><b class="num" id="sValue">$0</b><span>Product used</span></div>
+          <div class="stat"><b class="num" id="sBrands">0</b><span>Brands</span></div>
+        </div>
+        <h2>Recent</h2>
+        <ul class="list" id="recent"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="view" id="view-catalog">
+    <div class="head-row">
+      <div><h1>Products</h1><p class="lead">Everything Bintro recognizes when you scan.</p></div>
+      <button class="btn btn-primary btn-sm" id="addProduct">Add product</button>
+    </div>
+    <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search brand, product, or barcode" aria-label="Search products"></label>
+    <ul class="list" id="catalogList"></ul>
+  </section>
+
+  <!-- ACTIVITY -->
+  <section class="view" id="view-activity">
+    <h1>Activity</h1>
+    <p class="lead">What got used up, what it cost, and what stayed out of the landfill.</p>
+    <div class="chips" id="actPeriod" role="group" aria-label="Time period">
+      <button class="chip" data-p="week" aria-pressed="true">This week</button>
+      <button class="chip" data-p="7" aria-pressed="false">Last 7 days</button>
+      <button class="chip" data-p="all" aria-pressed="false">All time</button>
+    </div>
+    <div id="actBody"></div>
+  </section>
+
+  <!-- REORDER -->
+  <section class="view" id="view-reorder">
+    <h1>Reorder</h1>
+    <p class="lead">Built from everything you recycled, one unit back per empty. Adjust any line before you send it.</p>
+    <div class="chips" id="poPeriod" role="group" aria-label="Time period">
+      <button class="chip" data-p="week" aria-pressed="true">This week</button>
+      <button class="chip" data-p="7" aria-pressed="false">Last 7 days</button>
+      <button class="chip" data-p="all" aria-pressed="false">All time</button>
+    </div>
+    <div id="poBody"></div>
+  </section>
+
+  <p class="foot">Data is saved on this device. <button id="resetAll">Reset to sample data</button></p>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grabber"></div><div id="sheetBody"></div></div>
+
+<div class="cam" id="cam" role="dialog" aria-modal="true" aria-label="Camera scanner">
+  <div class="cam-bar"><strong>Scan a barcode</strong><button id="camClose">Close</button></div>
+  <div id="reader"></div>
+  <div class="cam-hint">Hold steady about 6 inches from the barcode</div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<input type="file" id="labelFile" accept="image/*" capture="environment" hidden>
+
+<script>
+/* ---------- storage (this device) ---------- */
+const K={cat:'bintro:catalog',drops:'bintro:drops',seed:'bintro:seeded'};
+function load(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+let catalog=[],drops=[],qtyOverride={},actP='week',poP='week';
+const uid=()=>Math.random().toString(36).slice(2,10);
+const money=n=>'$'+(Number(n)||0).toFixed(2);
+const moneyShort=n=>'$'+Math.round(Number(n)||0);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* sample data */
+function seedCatalog(){
+  const mk=(barcode,brand,product,size,price,material,vendor)=>({id:uid(),barcode,brand,product,size,price,material,vendor,image:''});
+  return [
+    mk('SN-ALF-0611','Alfaparf','Evolution 6.11 Dark Intense Ash Blonde','60 ml',11,'plastic','SalonCentric'),
+    mk('SN-ALF-0600','Alfaparf','Evolution 6.0 Dark Blonde','60 ml',11,'plastic','SalonCentric'),
+    mk('SN-ALF-0400','Alfaparf','Evolution 4.0 Medium Brown','60 ml',11,'plastic','SalonCentric'),
+    mk('SN-ALF-0921','Alfaparf','Color Wear 9.21 Light Beige Blonde','60 ml',10.5,'plastic','SalonCentric'),
+    mk('SN-ALF-DEV20','Alfaparf','Oxid\u2019o Developer 20 vol','1 L',9,'plastic','SalonCentric'),
+    mk('SN-ALF-BOX','Alfaparf','Evolution outer carton','',0,'cardboard','SalonCentric'),
+    mk('SN-HST-NW','Hairstory','New Wash Original refill pouch','',40,'plastic','Hairstory'),
+    mk('SN-RVE-MILK','Reverie','Milk Anti-Frizz Leave-In','',38,'plastic','Reverie'),
+    mk('SN-CK-TONIK','Cult + King','TONIK scalp + hair tonic','',32,'plastic','Cult + King'),
+  ];
+}
+function seedDrops(cat){
+  const plan=[['Evolution 6.11',3],['Evolution 6.0',2],['Evolution 4.0',2],['Color Wear',1],['Oxid',4],['Milk',1],['TONIK',1],['New Wash',1]];
+  const now=Date.now(),day=864e5,out=[];let off=0;
+  plan.forEach(([p,q])=>{const it=cat.find(c=>c.product.includes(p));if(!it)return;
+    for(let i=0;i<q;i++){out.push(dropFrom(it,now-(Math.floor(off)%6)*day-Math.floor(Math.random()*day*.4)));off+=1.7}});
+  return out.sort((a,b)=>a.ts-b.ts);
+}
+function dropFrom(it,ts){return{id:uid(),barcode:it.barcode,brand:it.brand,product:it.product,size:it.size||'',price:it.price,material:it.material,vendor:it.vendor,image:it.image||'',ts:ts||Date.now()}}
+function persist(){save(K.cat,catalog);save(K.drops,drops)}
+
+function boot(){
+  catalog=load(K.cat);drops=load(K.drops);
+  if(!load(K.seed)||!catalog){catalog=seedCatalog();drops=seedDrops(catalog);persist();save(K.seed,true);$('sampleBanner').hidden=false}
+  catalog=catalog||[];drops=drops||[];
+  placeNav();renderAll();
+}
+
+/* ---------- navigation ---------- */
+function placeNav(){const nav=$('nav'),slot=$('navSlot');
+  const mq=matchMedia('(min-width:900px)');const f=()=>{if(mq.matches)slot.appendChild(nav);else document.body.appendChild(nav)};
+  f();mq.addEventListener('change',f)}
+$('nav').addEventListener('click',e=>{const b=e.target.closest('button[data-view]');if(!b)return;go(b.dataset.view)});
+function go(v){
+  document.querySelectorAll('#nav button').forEach(b=>{if(b.dataset.view===v)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('show',s.id==='view-'+v));
+  window.scrollTo({top:0});renderAll();
+}
+
+/* ---------- feedback: sound, buzz, orb ---------- */
+let actx;
+function beep(ok){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();
+  o.frequency.value=ok?880:220;o.type='sine';g.gain.setValueAtTime(.12,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.18);
+  o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+.2)}catch(e){}
+  if(navigator.vibrate)navigator.vibrate(ok?40:[60,40,60])}
+const ICONS={
+  idle:'<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8v8M10 8v8M13 8v8M17 8v8"/>',
+  good:'<path d="M20 6L9 17l-5-5"/>',
+  warn:'<path d="M12 5v14M5 12h14"/>',
+  bad:'<path d="M18 6L6 18M6 6l12 12"/>'};
+let orbT;
+function setOrb(mode,title,sub){const o=$('orb');o.className='orb '+mode;void o.offsetWidth;if(mode!=='idle')o.classList.add('bump');
+  $('orbIcon').innerHTML=ICONS[mode];$('orbTitle').textContent=title;$('orbSub').textContent=sub;
+  clearTimeout(orbT);if(mode!=='idle'&&mode!=='warn')orbT=setTimeout(()=>setOrb('idle','Tap to scan','Point your camera at the barcode'),3000)}
+
+/* ---------- scanning ---------- */
+function handleScan(raw){
+  const code=String(raw||'').trim();if(!code)return;
+  const item=catalog.find(c=>c.barcode.toLowerCase()===code.toLowerCase());
+  if(!item){beep(true);setOrb('warn','New product','Looking it up');openNewItem(code);return}
+  if(item.material==='other'){beep(false);setOrb('bad','Not this bin','Plastic and cardboard only');toast(item.product+' was not logged');return}
+  logDrop(item);beep(true);setOrb('good','Recycled',item.product);
+}
+function logDrop(item){const d=dropFrom(item);drops.push(d);persist();renderAll();
+  toast('Logged '+item.product,()=>{drops=drops.filter(x=>x.id!==d.id);persist();renderAll();toast('Removed')})}
+
+/* hardware scanners type fast and end with Enter: catch them anywhere */
+let buf='',lastKey=0;
+document.addEventListener('keydown',e=>{
+  if(!$('view-scan').classList.contains('show'))return;
+  if(e.target.closest('input,textarea,select')||$('sheet').classList.contains('open'))return;
+  const now=performance.now();if(now-lastKey>80)buf='';lastKey=now;
+  if(e.key==='Enter'){if(buf.length>=4){e.preventDefault();handleScan(buf)}buf='';return}
+  if(e.key.length===1)buf+=e.key;
+});
+
+/* camera */
+let scanner=null,libLoading=null;
+function loadLib(){if(window.Html5Qrcode)return Promise.resolve();
+  return libLoading||(libLoading=new Promise((res,rej)=>{const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';s.onload=res;s.onerror=()=>{libLoading=null;rej()};document.head.appendChild(s)}))}
+async function openCamera(){
+  const cam=$('cam'),reader=$('reader');cam.classList.add('open');reader.innerHTML='';
+  try{await loadLib()}catch(e){reader.innerHTML='<p class="cam-msg">The camera scanner could not load. Check your connection, or type the barcode instead.</p>';return}
+  const F=window.Html5QrcodeSupportedFormats;
+  scanner=new Html5Qrcode('reader',{verbose:false,experimentalFeatures:{useBarCodeDetectorIfSupported:true},
+    formatsToSupport:[F.EAN_13,F.EAN_8,F.UPC_A,F.UPC_E,F.CODE_128,F.CODE_39,F.ITF,F.QR_CODE]});
+  try{
+    await scanner.start({facingMode:'environment'},{fps:12,qrbox:(w,h)=>({width:Math.floor(Math.min(w*.82,340)),height:Math.floor(Math.min(h*.32,170))})},
+      text=>{closeCamera().then(()=>handleScan(text))},()=>{});
+  }catch(err){
+    reader.innerHTML='<p class="cam-msg">Bintro needs camera access to scan. Allow the camera in your browser settings, then try again. You can also use a Bluetooth scanner or type the code.</p>';
+    scanner=null;
+  }
+}
+async function closeCamera(){$('cam').classList.remove('open');if(scanner){try{await scanner.stop();scanner.clear()}catch(e){}scanner=null}}
+$('orb').onclick=openCamera;
+$('camClose').onclick=closeCamera;
+$('typeCode').onclick=()=>{
+  openSheet(`<h2>Type a barcode</h2><p class="sub">Use the numbers printed under the bars.</p>
+    <div class="field"><label for="mCode">Barcode</label><input id="mCode" inputmode="numeric" autocomplete="off"></div>
+    <div class="sheet-actions"><button class="btn btn-tonal" data-close>Cancel</button><button class="btn btn-primary" id="mGo">Look up</button></div>`);
+  const go=()=>{const v=$('mCode').value.trim();if(!v)return;closeSheet();setTimeout(()=>handleScan(v),200)};
+  $('mGo').onclick=go;$('mCode').onkeydown=e=>{if(e.key==='Enter')go()};setTimeout(()=>$('mCode').focus(),250);
+};
+
+/* ---------- sheet ---------- */
+function openSheet(html){$('sheetBody').innerHTML=html;$('sheet').classList.add('open');$('scrim').classList.add('open');
+  $('sheetBody').querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{closeSheet();setOrb('idle','Tap to scan','Point your camera at the barcode')})}
+function closeSheet(){$('sheet').classList.remove('open');$('scrim').classList.remove('open')}
+$('scrim').onclick=()=>{closeSheet();setOrb('idle','Tap to scan','Point your camera at the barcode')};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('cam').classList.contains('open'))closeCamera();else if($('sheet').classList.contains('open')){closeSheet();setOrb('idle','Tap to scan','Point your camera at the barcode')}}});
+
+/* ---------- lookup: catalog, then barcode databases, then label photo ---------- */
+async function lookupBarcode(code){
+  try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),7000);
+    const r=await fetch('/.netlify/functions/lookup?code='+encodeURIComponent(code),{signal:ctl.signal});clearTimeout(t);
+    if(!r.ok)return{found:false};return await r.json()}catch(e){return{found:false}}
+}
+function vendorFor(brand){const m=[...catalog].reverse().find(c=>brand&&c.brand.toLowerCase()===brand.toLowerCase());return m?m.vendor:''}
+
+function productForm(p,{title,sub,saveLabel,foundHtml}){
+  return `<h2>${title}</h2><p class="sub">${sub}</p>
+    <div id="foundBox">${foundHtml||''}</div>
+    <button class="btn btn-tonal label-btn" id="readLabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Fill in from a label photo</button>
+    <div class="field"><label for="fBrand">Brand</label><input id="fBrand" value="${esc(p.brand)}" list="brandList"></div>
+    <div class="field"><label for="fProduct">Product and shade</label><input id="fProduct" value="${esc(p.product)}"></div>
+    <div class="two">
+      <div class="field"><label for="fSize">Size</label><input id="fSize" value="${esc(p.size)}" placeholder="60 ml"></div>
+      <div class="field"><label for="fPrice">Your cost</label><input id="fPrice" type="number" inputmode="decimal" step="0.01" min="0" value="${p.price===''||p.price==null?'':p.price}" placeholder="0.00"></div>
+    </div>
+    <div class="field"><label for="fVendor">Buy it from</label><input id="fVendor" value="${esc(p.vendor)}" list="vendorList" placeholder="SalonCentric"></div>
+    <div class="field"><label>Empty goes in</label><div class="seg" id="fMat">
+      ${['plastic','cardboard','other'].map(m=>`<button type="button" data-m="${m}" aria-pressed="${p.material===m}">${m==='other'?'Not recyclable here':m[0].toUpperCase()+m.slice(1)}</button>`).join('')}</div></div>
+    <p class="sub" style="margin:0">Barcode ${esc(p.barcode||'none')}</p>
+    <datalist id="brandList">${[...new Set(catalog.map(c=>c.brand))].map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
+    <datalist id="vendorList">${[...new Set(catalog.map(c=>c.vendor))].map(b=>`<option value="${esc(b)}">`).join('')}</datalist>
+    <div class="sheet-actions"><button class="btn btn-tonal" data-close>Cancel</button><button class="btn btn-primary" id="fSave">${saveLabel}</button></div>`;
+}
+function wireForm(p,onSave){
+  let mat=p.material||'plastic',image=p.image||'';
+  $('fMat').onclick=e=>{const b=e.target.closest('button');if(!b)return;mat=b.dataset.m;$('fMat').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b))};
+  $('fBrand').onchange=()=>{if(!$('fVendor').value)$('fVendor').value=vendorFor($('fBrand').value)};
+  $('readLabel').onclick=()=>{const f=$('labelFile');f.value='';f.onchange=()=>f.files[0]&&readLabel(f.files[0],r=>{
+      if(r.brand)$('fBrand').value=r.brand; if(r.product)$('fProduct').value=r.product; if(r.size)$('fSize').value=r.size;
+      if(r.material&&['plastic','cardboard','other'].includes(r.material)){mat=r.material;$('fMat').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.m===mat))}
+      if(!$('fVendor').value)$('fVendor').value=vendorFor(r.brand);
+      $('foundBox').innerHTML=foundCard({brand:r.brand,product:r.product,size:r.size},'Read from your photo. Check it before saving.');
+    });f.click()};
+  $('fSave').onclick=()=>{
+    const rec={brand:$('fBrand').value.trim()||'Unbranded',product:$('fProduct').value.trim(),size:$('fSize').value.trim(),
+      price:parseFloat($('fPrice').value)||0,vendor:$('fVendor').value.trim()||$('fBrand').value.trim()||'Unassigned',material:mat,image};
+    if(!rec.product){toast('Add a product name to save');$('fProduct').focus();return}
+    onSave(rec);
+  };
+  return{setImage:v=>image=v};
+}
+function foundCard(r,note){
+  return `<div class="found"><div class="thumb">${r.image?`<img src="${esc(r.image)}" alt="">`:esc((r.brand||'?')[0])}</div>
+    <div><b>${esc(r.product||'Product')}</b><p>${esc([r.brand,r.size].filter(Boolean).join(', '))}</p><p>${esc(note)}</p></div></div>`;
+}
+
+async function openNewItem(code){
+  const p={barcode:code,brand:'',product:'',size:'',price:'',vendor:'',material:'plastic',image:''};
+  openSheet(productForm(p,{title:'New product',sub:'First time scanning this one. Save it once and Bintro knows it from now on.',saveLabel:'Save and log',
+    foundHtml:'<div class="found"><div class="thumb"></div><div style="flex:1"><div class="skel" style="width:70%"></div><div class="skel" style="width:45%"></div></div></div>'}));
+  const form=wireForm(p,rec=>{const item={id:uid(),barcode:code,...rec};catalog.push(item);persist();closeSheet();
+    if(item.material==='other'){setOrb('bad','Saved','Not recyclable here, so not logged');renderAll()}
+    else{logDrop(item);beep(true);setOrb('good','Recycled',item.product)}});
+  const r=await lookupBarcode(code);
+  if(!$('sheet').classList.contains('open')||!$('fBrand'))return;
+  if(r.found){
+    if(!$('fBrand').value)$('fBrand').value=r.brand||'';
+    if(!$('fProduct').value)$('fProduct').value=r.product||'';
+    if(!$('fSize').value)$('fSize').value=r.size||'';
+    if(!$('fVendor').value)$('fVendor').value=vendorFor(r.brand);
+    if(r.image)form.setImage(r.image);
+    $('foundBox').innerHTML=foundCard(r,'Found in '+r.source+'. Check the shade and size, then save.');
+  }else{
+    $('foundBox').innerHTML='<div class="found miss"><p><b>No match in the barcode databases.</b> Snap the front label and Bintro fills this in for you.</p></div>';
+  }
+}
+
+/* label photo, shrunk before upload, read by AI on the server */
+function readLabel(file,cb){
+  $('readLabel').disabled=true;$('readLabel').lastChild.textContent='Reading the label';
+  const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=async()=>{
+    const max=1400,s=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement('canvas');
+    c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+    const data=c.toDataURL('image/jpeg',.82).split(',')[1];
+    try{const r=await fetch('/.netlify/functions/read-label',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:data,mediaType:'image/jpeg'})});
+      const j=await r.json();if(!r.ok||j.error)throw new Error(j.error||'failed');cb(j)}
+    catch(e){toast('Could not read that label. Try a closer, well-lit photo.')}
+    finally{if($('readLabel')){$('readLabel').disabled=false;$('readLabel').lastChild.textContent='Fill in from a label photo'}}
+  };
+  img.onerror=()=>{toast('That photo could not be opened');$('readLabel').disabled=false};
+  img.src=url;
+}
+
+/* ---------- render: scan screen ---------- */
+function startOfToday(){const d=new Date();d.setHours(0,0,0,0);return d.getTime()}
+function thumb(x){return `<div class="thumb">${x.image?`<img src="${esc(x.image)}" alt="" loading="lazy">`:esc((x.brand||'?')[0])}</div>`}
+function renderScan(){
+  const t=drops.filter(d=>d.ts>=startOfToday());
+  $('sCount').textContent=t.length;$('sValue').textContent=moneyShort(t.reduce((s,d)=>s+(+d.price||0),0));
+  $('sBrands').textContent=new Set(t.map(d=>d.brand)).size;
+  const last=[...drops].sort((a,b)=>b.ts-a.ts).slice(0,8);
+  $('recent').innerHTML=last.length?last.map(d=>`<li class="row">${thumb(d)}
+      <div class="row-main"><div class="row-title">${esc(d.product)}</div><div class="row-sub">${esc([d.brand,d.size].filter(Boolean).join(', '))}</div></div>
+      <div class="row-end">${timeAgo(d.ts)}</div>
+      <button class="icon-btn" data-undo="${d.id}" aria-label="Remove ${esc(d.product)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button></li>`).join('')
+    :'<li class="empty"><b>Nothing scanned yet</b>Tap the circle to scan your first empty.</li>';
+  $('recent').querySelectorAll('[data-undo]').forEach(b=>b.onclick=()=>{drops=drops.filter(x=>x.id!==b.dataset.undo);persist();renderAll();toast('Removed')});
+}
+
+/* ---------- render: products ---------- */
+$('q').oninput=renderCatalog;
+function renderCatalog(){
+  const q=$('q').value.trim().toLowerCase();
+  const list=catalog.filter(c=>!q||[c.brand,c.product,c.barcode,c.vendor].join(' ').toLowerCase().includes(q))
+    .sort((a,b)=>a.brand.localeCompare(b.brand)||a.product.localeCompare(b.product));
+  $('catalogList').innerHTML=list.length?list.map(c=>`<li class="row">${thumb(c)}
+      <div class="row-main"><div class="row-title">${esc(c.product)}</div>
+      <div class="row-sub">${esc([c.brand,c.size,c.vendor].filter(Boolean).join(', '))}</div></div>
+      <div class="row-end"><div class="num">${money(c.price)}</div><span class="tag ${c.material}">${c.material==='other'?'Not recyclable':c.material}</span></div>
+      <button class="icon-btn" data-edit="${c.id}" aria-label="Edit ${esc(c.product)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button></li>`).join('')
+    :`<li class="empty"><b>${q?'No products match that search':'No products yet'}</b>${q?'Try a brand name or part of the barcode.':'Scan an empty and Bintro adds it here.'}</li>`;
+  $('catalogList').querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));
+}
+$('addProduct').onclick=()=>editProduct(null);
+function editProduct(id){
+  const p=id?{...catalog.find(c=>c.id===id)}:{barcode:'',brand:'',product:'',size:'',price:'',vendor:'',material:'plastic',image:''};
+  let html=productForm(p,{title:id?'Edit product':'Add product',sub:id?'Changes apply to future scans and reorders.':'Add it by hand, or scan it from the Scan tab.',saveLabel:'Save'});
+  html=html.replace(`<p class="sub" style="margin:0">Barcode ${esc(p.barcode||'none')}</p>`,
+    `<div class="field"><label for="fCode">Barcode</label><input id="fCode" value="${esc(p.barcode)}" inputmode="numeric"></div>`+
+    (id?'<button class="btn btn-text" id="fDel" style="color:var(--bad);padding-left:0">Delete product</button>':''));
+  openSheet(html);
+  wireForm(p,rec=>{rec.barcode=$('fCode').value.trim();
+    if(id)Object.assign(catalog.find(c=>c.id===id),rec);else catalog.push({id:uid(),...rec});
+    persist();closeSheet();renderAll();toast('Saved')});
+  if(id)$('fDel').onclick=()=>{if(!confirm('Delete this product? Past scans stay in your history.'))return;
+    catalog=catalog.filter(c=>c.id!==id);persist();closeSheet();renderAll();toast('Deleted')};
+}
+
+/* ---------- periods ---------- */
+function startOfWeek(){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}
+function inPeriod(p){if(p==='all')return drops.slice();const cut=p==='7'?Date.now()-7*864e5:startOfWeek();return drops.filter(d=>d.ts>=cut)}
+function wireChips(id,set){$(id).onclick=e=>{const b=e.target.closest('.chip');if(!b)return;set(b.dataset.p);
+  $(id).querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));renderAll()}}
+wireChips('actPeriod',p=>actP=p);wireChips('poPeriod',p=>poP=p);
+
+/* ---------- render: activity ---------- */
+function renderActivity(){
+  const list=inPeriod(actP);
+  if(!list.length){$('actBody').innerHTML='<div class="empty"><b>Nothing recycled in this period</b>Scan an empty on the Scan tab and it shows up here.</div>';return}
+  const value=list.reduce((s,d)=>s+(+d.price||0),0);
+  const by={};list.forEach(d=>{(by[d.brand]=by[d.brand]||{});const o=by[d.brand][d.product]=by[d.brand][d.product]||{qty:0,price:d.price,size:d.size,image:d.image,brand:d.brand};o.qty++});
+  $('actBody').innerHTML=`<div class="stats">
+      <div class="stat"><b class="num">${list.length}</b><span>Empties recycled</span></div>
+      <div class="stat"><b class="num">${moneyShort(value)}</b><span>Product used</span></div>
+      <div class="stat"><b class="num">${Object.keys(by).length}</b><span>Brands</span></div></div>`+
+    Object.keys(by).sort().map(b=>{const items=Object.entries(by[b]).sort((x,y)=>y[1].qty-x[1].qty);
+      return `<div class="group"><div class="group-head"><h3>${esc(b)}</h3><span class="num">${items.reduce((s,[,o])=>s+o.qty,0)} used</span></div>
+        <ul class="list">${items.map(([name,o])=>`<li class="row">${thumb(o)}<div class="row-main"><div class="row-title">${esc(name)}</div>
+        <div class="row-sub">${esc([o.size,money(o.price)+' each'].filter(Boolean).join(', '))}</div></div>
+        <div class="row-end"><b class="num" style="color:var(--text)">${o.qty}</b><div class="num">${money(o.qty*o.price)}</div></div></li>`).join('')}</ul></div>`}).join('');
+}
+
+/* ---------- render: reorder ---------- */
+function groups(list){const by={};list.forEach(d=>{const v=d.vendor||d.brand;by[v]=by[v]||{};const k=d.barcode+'|'+d.product;
+  const o=by[v][k]=by[v][k]||{key:k,product:d.product,brand:d.brand,size:d.size,image:d.image,barcode:d.barcode,price:d.price,qty:0};o.qty++});
+  return Object.entries(by).map(([vendor,it])=>({vendor,lines:Object.values(it).sort((a,b)=>a.product.localeCompare(b.product))})).sort((a,b)=>a.vendor.localeCompare(b.vendor))}
+const qtyFor=l=>qtyOverride[l.key]!=null?qtyOverride[l.key]:l.qty;
+function poNumber(){const d=new Date();return 'PO-'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
+function renderReorder(){
+  const list=inPeriod(poP);
+  if(!list.length){$('poBody').innerHTML='<div class="empty"><b>Nothing to reorder yet</b>Every empty you scan becomes a line here, grouped by where you buy it.</div>';return}
+  const g=groups(list);let grand=0;
+  const html=g.map(v=>{let sub=0;const rows=v.lines.map(l=>{const q=qtyFor(l);sub+=q*l.price;
+      return `<li class="row">${thumb(l)}<div class="row-main"><div class="row-title">${esc(l.product)}</div>
+        <div class="row-sub">${esc([l.brand,l.size,money(l.price)+' each'].filter(Boolean).join(', '))}</div></div>
+        <div class="stepper"><button data-k="${esc(l.key)}" data-d="-1" aria-label="Fewer">&minus;</button><span class="num">${q}</span><button data-k="${esc(l.key)}" data-d="1" aria-label="More">+</button></div></li>`}).join('');
+    grand+=sub;return `<div class="group"><div class="group-head"><h3>${esc(v.vendor)}</h3><span class="num">${money(sub)}</span></div><ul class="list">${rows}</ul></div>`}).join('');
+  $('poBody').innerHTML=`<div class="actions"><button class="btn btn-primary btn-sm" id="copyPO">Copy order</button>
+      <button class="btn btn-tonal btn-sm" id="csvPO">Download CSV</button><button class="btn btn-tonal btn-sm" id="printPO">Print</button></div>
+    ${html}<div class="total"><span>Order total</span><span class="num">${money(grand)}</span></div>`;
+  $('poBody').querySelectorAll('.stepper button').forEach(b=>b.onclick=()=>{const l=g.flatMap(v=>v.lines).find(x=>x.key===b.dataset.k);
+    qtyOverride[l.key]=Math.max(0,qtyFor(l)+(+b.dataset.d));renderReorder()});
+  $('copyPO').onclick=()=>copyText(poText(g));$('csvPO').onclick=()=>csv(g);$('printPO').onclick=()=>window.print();
+}
+function poText(g){let out='SHAG NOIR SALON, PURCHASE ORDER\n'+poNumber()+', '+new Date().toLocaleDateString()+'\n2511 E 6th St, Suite D, Austin, TX 78702\n',grand=0;
+  g.forEach(v=>{out+='\n'+v.vendor+'\n';let sub=0;v.lines.forEach(l=>{const q=qtyFor(l);if(!q)return;sub+=q*l.price;
+    out+=`${q} x ${l.product}${l.size?' ('+l.size+')':''}, ${l.barcode}, ${money(l.price)} each = ${money(q*l.price)}\n`});
+    out+=`Subtotal: ${money(sub)}\n`;grand+=sub});return out+'\nOrder total: '+money(grand)+'\n'}
+function csv(g){const rows=[['Vendor','Brand','Product','Size','Barcode','Qty','Unit cost','Line total']];
+  g.forEach(v=>v.lines.forEach(l=>{const q=qtyFor(l);rows.push([v.vendor,l.brand,l.product,l.size||'',l.barcode,q,(+l.price).toFixed(2),(q*l.price).toFixed(2)])}));
+  const blob=new Blob([rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=poNumber()+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);toast('CSV downloaded')}
+function copyText(t){(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Order copied'),()=>{
+  const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Order copied')}catch(e){}ta.remove()})}
+
+/* ---------- misc ---------- */
+function timeAgo(ts){const s=(Date.now()-ts)/1e3;if(s<60)return'Just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
+let toastT;
+function toast(msg,undo){const t=$('toast');t.innerHTML=esc(msg)+(undo?' <button class="btn btn-text btn-sm" style="color:#f6b27a;padding:0 4px" id="tUndo">Undo</button>':'');
+  t.classList.add('show');t.style.pointerEvents=undo?'auto':'none';if(undo)$('tUndo').onclick=()=>{t.classList.remove('show');undo()};
+  clearTimeout(toastT);toastT=setTimeout(()=>{t.classList.remove('show');t.style.pointerEvents='none'},undo?4500:2600)}
+$('clearSample').onclick=()=>{drops=[];qtyOverride={};persist();$('sampleBanner').hidden=true;renderAll();toast('Sample scans cleared, products kept')};
+$('resetAll').onclick=()=>{if(!confirm('Reset products and history back to the sample data?'))return;
+  catalog=seedCatalog();drops=seedDrops(catalog);qtyOverride={};persist();$('sampleBanner').hidden=false;renderAll();toast('Reset to sample data')};
+function renderAll(){renderScan();renderCatalog();renderActivity();renderReorder()}
+
+boot();
+</script>
+</body>
+</html>
